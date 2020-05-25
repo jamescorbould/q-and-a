@@ -14,6 +14,10 @@ export interface AnswerData {
   created: Date;
 }
 
+const wait = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 const questions: QuestionData[] = [
   {
     questionId: 1,
@@ -49,6 +53,8 @@ const questions: QuestionData[] = [
   },
 ];
 
-export const getUnansweredQuestions = (): QuestionData[] => {
+export const getUnansweredQuestions = async (): Promise<QuestionData[]> => {
+  // Wrap QuestionsData in a Promise.
+  await wait(500);
   return questions.filter((q) => q.answers.length === 0);
 };
