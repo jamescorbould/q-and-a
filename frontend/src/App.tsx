@@ -8,6 +8,8 @@ import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom';
 import { AskPage } from './AskPage';
 import { SearchPage } from './SearchPage';
 import { SignInPage } from './SignInPage';
+import { NotFoundPage } from './NotFoundPage';
+import { QuestionPage } from './QuestionPage';
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Route path="/search" component={SearchPage} />
           <Route path="/ask" component={AskPage} />
           <Route path="/signin" component={SignInPage} />
+          <Route path="/questions/:questionId" component={QuestionPage} />
+          <Route component={NotFoundPage} />
         </Switch>
       </div>
     </BrowserRouter>
