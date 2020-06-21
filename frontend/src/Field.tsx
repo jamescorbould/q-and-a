@@ -1,6 +1,7 @@
 /** @jsx jsx */ import { css, jsx } from '@emotion/core';
-import { FC } from 'react';
+import { FC, useContext, ChangeEvent } from 'react';
 import { fontFamily, fontSize, gray5, gray2, gray6 } from './Styles';
+import { FormContext } from './Form';
 
 interface Props {
   name: string;
@@ -28,34 +29,48 @@ const baseCSS = css`
 `;
 
 export const Field: FC<Props> = ({ name, label, type = 'Text' }) => (
-  <div
-    css={css`
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 15px;
-    `}
-  >
-    {label && (
-      <label
+  <FormContext.Consumer>
+    {(context) => (
+      <div
         css={css`
-          font-weight: bold;
+          display: flex;
+          flex-direction: column;
+          margin-bottom: 15px;
         `}
-        htmlFor={name}
       >
-        {label}
-      </label>
+        {label && (
+          <label
+            css={css`
+              font-weight: bold;
+            `}
+            htmlFor={name}
+          >
+            {label}
+          </label>
+        )}
+        {(type === 'Text' || type === 'Password') && (
+          <input
+            type={type.toLowerCase()}
+            id={name}
+            value={
+              context.values[name] === undefined ? '' : context.values[name]
+            }
+            css={baseCSS}
+          />
+        )}
+        {type === 'TextArea' && (
+          <textarea
+            id={name}
+            value={
+              context.values[name] === undefined ? '' : context.values[name]
+            }
+            css={css`
+              ${baseCSS};
+              height: 100px;
+            `}
+          />
+        )}
+      </div>
     )}
-    {(type === 'Text' || type === 'Password') && (
-      <input type={type.toLowerCase()} id={name} css={baseCSS} />
-    )}
-    {type === 'TextArea' && (
-      <textarea
-        id={name}
-        css={css`
-          ${baseCSS};
-          height: 100px;
-        `}
-      />
-    )}
-  </div>
+  </FormContext.Consumer>
 );
