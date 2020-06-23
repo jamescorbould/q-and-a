@@ -28,49 +28,57 @@ const baseCSS = css`
   }
 `;
 
-export const Field: FC<Props> = ({ name, label, type = 'Text' }) => (
-  <FormContext.Consumer>
-    {(context) => (
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          margin-bottom: 15px;
-        `}
-      >
-        {label && (
-          <label
-            css={css`
-              font-weight: bold;
-            `}
-            htmlFor={name}
-          >
-            {label}
-          </label>
-        )}
-        {(type === 'Text' || type === 'Password') && (
-          <input
-            type={type.toLowerCase()}
-            id={name}
-            value={
-              context.values[name] === undefined ? '' : context.values[name]
-            }
-            css={baseCSS}
-          />
-        )}
-        {type === 'TextArea' && (
-          <textarea
-            id={name}
-            value={
-              context.values[name] === undefined ? '' : context.values[name]
-            }
-            css={css`
-              ${baseCSS};
-              height: 100px;
-            `}
-          />
-        )}
-      </div>
-    )}
-  </FormContext.Consumer>
-);
+export const Field: FC<Props> = ({ name, label, type = 'Text' }) => {
+  const { setValue } = useContext(FormContext);
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    if (setValue) {
+      setValue(name, e.currentTarget.value);
+    }
+  };
+  return (
+    <FormContext.Consumer>
+      {({ values }) => (
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+          `}
+        >
+          {label && (
+            <label
+              css={css`
+                font-weight: bold;
+              `}
+              htmlFor={name}
+            >
+              {label}
+            </label>
+          )}
+          {(type === 'Text' || type === 'Password') && (
+            <input
+              type={type.toLowerCase()}
+              id={name}
+              value={values[name] === undefined ? '' : values[name]}
+              onChange={handleChange}
+              css={baseCSS}
+            />
+          )}
+          {type === 'TextArea' && (
+            <textarea
+              id={name}
+              value={values[name] === undefined ? '' : values[name]}
+              onChange={handleChange}
+              css={css`
+                ${baseCSS};
+                height: 100px;
+              `}
+            />
+          )}
+        </div>
+      )}
+    </FormContext.Consumer>
+  );
+};
