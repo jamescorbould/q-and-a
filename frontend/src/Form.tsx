@@ -65,7 +65,25 @@ export const Form: FC<Props> = ({
   const [touched, setTouched] = useState<Touched>({});
 
   const validate = (fieldName: string): string[] => {
-    return [];
+    if (!validationRules) {
+      return [];
+    }
+    if (!validationRules[fieldName]) {
+      return [];
+    }
+    const rules = Array.isArray(validationRules[fieldName])
+      ? (validationRules[fieldName] as Validation[])
+      : ([validationRules[fieldName]] as Validation[]);
+    const fieldErrors: string[] = [];
+    rules.forEach((rule) => {
+      const error = rule.validator(values[fieldName], rule.arg);
+      if (error) {
+        fieldErrors.push(error);
+      }
+    });
+    const newErrors = { ...errors, [fieldName]: fieldErrors };
+    setErrors(newErrors);
+    return fieldErrors;
   };
 
   return (
