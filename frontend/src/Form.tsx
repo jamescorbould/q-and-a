@@ -14,6 +14,11 @@ export interface Touched {
   [key: string]: boolean;
 }
 
+export interface SubmitResult {
+  success: boolean;
+  errors?: Errors;
+}
+
 interface FormContextProps {
   values: Values;
   setValue?: (fieldName: string, value: any) => void;
@@ -53,12 +58,18 @@ interface ValidationProp {
 interface Props {
   submitCaption?: string;
   validationRules?: ValidationProp;
+  onSubmit: (values: Values) => Promise<SubmitResult>;
+  successMessage?: string;
+  failureMessage?: string;
 }
 
 export const Form: FC<Props> = ({
   submitCaption,
   children,
   validationRules,
+  onSubmit,
+  successMessage = 'Success!',
+  failureMessage = 'Something went wrong',
 }) => {
   const [values, setValues] = useState<Values>({});
   const [errors, setErrors] = useState<Errors>({});
@@ -94,8 +105,9 @@ export const Form: FC<Props> = ({
     if (validateForm()) {
       setSubmitting(true);
       setSubmitError(false);
-      // TODO - call the consumer submit function
-      // TODO - set any errors in state
+      const result = await onSubmit(values);
+      setErrors(result.errors || {});
+      setSubmitError(!result.success);
       setSubmitting(false);
       setSubmitted(true);
     }
@@ -133,6 +145,7 @@ export const Form: FC<Props> = ({
     >
       <form noValidate={true} onSubmit={handleSubmit}>
         <fieldset
+          disabled={submitting || (submitted && !submitError)}
           css={css`
             margin: 10px auto 0 auto;
             padding: 30px;
@@ -153,6 +166,24 @@ export const Form: FC<Props> = ({
           >
             <PrimaryButton type="submit"> {submitCaption} </PrimaryButton>
           </div>
+          {submitted && submitError && (
+            <p
+              css={css`
+                color: red;
+              `}
+            >
+              {failureMessage}
+            </p>
+          )}
+          {submitted && !submitError && (
+            <p
+              css={css`
+                color: green;
+              `}
+            >
+              {successMessage}
+            </p>
+          )}
         </fieldset>
       </form>
     </FormContext.Provider>
