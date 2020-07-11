@@ -6,7 +6,9 @@ import { FormContext } from './Form';
 interface Props {
   name: string;
   label?: string;
-  type?: 'Text' | 'TextArea' | 'Password';
+  type?: 'Text' | 'TextArea' | 'Password' | 'Number';
+  min?: number;
+  max?: number;
 }
 
 const baseCSS = css`
@@ -28,7 +30,7 @@ const baseCSS = css`
   }
 `;
 
-export const Field: FC<Props> = ({ name, label, type = 'Text' }) => {
+export const Field: FC<Props> = ({ name, label, type = 'Text', min, max }) => {
   const { setValue, touched, setTouched, validate } = useContext(FormContext);
   const handleChange = (
     e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
@@ -90,6 +92,18 @@ export const Field: FC<Props> = ({ name, label, type = 'Text' }) => {
                 ${baseCSS};
                 height: 100px;
               `}
+            />
+          )}
+          {type === 'Number' && (
+            <input
+              type={type.toLowerCase()}
+              id={name}
+              value={values[name] === undefined ? '' : values[name]}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              css={baseCSS}
+              min={min}
+              max={max}
             />
           )}
           {errors[name] &&

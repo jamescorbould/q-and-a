@@ -34,7 +34,7 @@ export const FormContext = createContext<FormContextProps>({
   touched: {},
 });
 
-type Validator = (value: any, args?: any) => string;
+type Validator = (value: any, args?: any, args2?: any) => string;
 
 export const required: Validator = (value: any): string =>
   value === undefined || value === null || value === ''
@@ -46,9 +46,19 @@ export const minLength: Validator = (value: any, length: number): string =>
     ? `This must be at least ${length} characters`
     : '';
 
+export const between: Validator = (
+  value: any,
+  minLength: number,
+  maxLength: number,
+): string =>
+  value < minLength || value > maxLength
+    ? `This must be between ${minLength} and ${maxLength}`
+    : '';
+
 interface Validation {
   validator: Validator;
   arg?: any;
+  arg2?: any;
 }
 
 interface ValidationProp {
@@ -90,7 +100,7 @@ export const Form: FC<Props> = ({
       : ([validationRules[fieldName]] as Validation[]);
     const fieldErrors: string[] = [];
     rules.forEach((rule) => {
-      const error = rule.validator(values[fieldName], rule.arg);
+      const error = rule.validator(values[fieldName], rule.arg, rule.arg2);
       if (error) {
         fieldErrors.push(error);
       }
