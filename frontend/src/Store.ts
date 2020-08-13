@@ -1,4 +1,10 @@
-import { Action, ActionCreator, Dispatch } from 'redux';
+import {
+  Action,
+  ActionCreator,
+  Dispatch,
+  Reducer,
+  combineReducers,
+} from 'redux';
 import {
   QuestionData,
   getUnansweredQuestions,
@@ -97,3 +103,43 @@ export const clearPostedQuestionActionCreator: ActionCreator<PostedQuestionActio
   };
   return postedQuestionAction;
 };
+
+const questionsReducer: Reducer<QuestionsState, QuestionsActions> = (
+  state = initialQuestionState,
+  action,
+) => {
+  switch (action.type) {
+    case 'GettingUnansweredQuestions': {
+      return {
+        ...state,
+        unanswered: null,
+        loading: true,
+      };
+    }
+    case 'GotUnansweredQuestions': {
+      return {
+        ...state,
+        unanswered: action.questions,
+        loading: false,
+      };
+    }
+    case 'PostedQuestion': {
+      return {
+        ...state,
+        unanswered: action.result
+          ? (state.unanswered || []).concat(action.result)
+          : state.unanswered,
+        postedResult: action.result,
+      };
+    }
+    default:
+      neverReached(action);
+  }
+  return state;
+};
+
+const neverReached = (never: never) => {};
+
+const rootReducer = combineReducers<AppState>({
+  questions: questionsReducer,
+});
