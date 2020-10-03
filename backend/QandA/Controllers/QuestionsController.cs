@@ -15,9 +15,16 @@ namespace QandA.Controllers
     {
         private readonly IDataRepository _dataRepository;
 
-        public QuestionsController()
+        public QuestionsController(IDataRepository dataRepository)
         {
-            // TODO - set reference to _dataRepository
+            _dataRepository = dataRepository;
+        }
+
+        [HttpGet]
+        public IEnumerable<QuestionGetManyResponse> GetQuestions()
+        {
+            var questions = _dataRepository.GetQuestions();
+            return questions;
         }
     }
 }

@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using DbUp;
+using QandA.Data;
 
 namespace QandA
 {
@@ -40,6 +41,7 @@ namespace QandA
             }
 
             services.AddControllers();
+            services.AddScoped<IDataRepository, DataRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

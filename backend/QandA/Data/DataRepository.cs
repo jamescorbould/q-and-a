@@ -13,7 +13,7 @@ namespace QandA.Data
 
         public DataRepository(IConfiguration configuration)
         {
-            _connectionString = configuration["ConnectionString:DefaultConnection"];
+            _connectionString = configuration["ConnectionStrings:DefaultConnection"];
         }
 
         public AnswerGetResponse GetAnswer(int answerId)
