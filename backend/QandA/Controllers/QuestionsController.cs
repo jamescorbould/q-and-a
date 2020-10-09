@@ -21,10 +21,16 @@ namespace QandA.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<QuestionGetManyResponse> GetQuestions()
+        public IEnumerable<QuestionGetManyResponse> GetQuestions(string search)
         {
-            var questions = _dataRepository.GetQuestions();
-            return questions;
+            if (string.IsNullOrEmpty(search))
+            {
+                return _dataRepository.GetQuestions();
+            }
+            else
+            {
+                return _dataRepository.GetQuestionsBySearch(search);
+            }
         }
     }
 }
