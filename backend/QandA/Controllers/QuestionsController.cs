@@ -32,5 +32,24 @@ namespace QandA.Controllers
                 return _dataRepository.GetQuestionsBySearch(search);
             }
         }
+
+        [HttpGet("unanswered")]
+        public IEnumerable<QuestionGetManyResponse> GetUnansweredQuestions()
+        {
+            return _dataRepository.GetUnansweredQuestions();
+        }
+
+        [HttpGet("{questionId}")]
+        public ActionResult<QuestionGetSingleResponse> GetQuestion(int questionId)
+        {
+            var question = _dataRepository.GetQuestion(questionId);
+
+            if (question == null)
+            {
+                return NotFound();
+            }
+
+            return question;
+        }
     }
 }
