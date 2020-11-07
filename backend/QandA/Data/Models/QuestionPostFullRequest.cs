@@ -1,13 +1,10 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace QandA.Data.Models
 {
-    public class AnswerPostRequest
+    public class QuestionPostFullRequest
     {
-        [Required]
-        public int? QuestionId { get; set; }
-        [Required]
+        public string Title { get; set; }
         public string Content { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }
