@@ -14,6 +14,6 @@ namespace QandA.Data
         QuestionGetSingleResponse PostQuestion(QuestionPostFullRequest question);
         QuestionGetSingleResponse PutQuestion(int questionId, QuestionPutRequest question);
         void DeleteQuestion(int questionId);
-        AnswerGetResponse PostAnswer(AnswerPostRequest answer);
+        AnswerGetResponse PostAnswer(AnswerPostFullRequest answer);
     }
 }

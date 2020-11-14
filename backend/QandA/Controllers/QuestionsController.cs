@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QandA.Data;
 using QandA.Data.Models;
@@ -111,7 +108,16 @@ namespace QandA.Controllers
                 return NotFound();
             }
 
-            var savedAnswer = _dataRepository.PostAnswer(answerPostRequest);
+            var savedAnswer =
+                _dataRepository.PostAnswer(new AnswerPostFullRequest
+                    {
+                        QuestionId = answerPostRequest.QuestionId.Value,
+                        Content = answerPostRequest.Content,
+                        UserId = "1",
+                        UserName = "bob.test@test.com",
+                        Created = DateTime.UtcNow
+                    }
+                );
 
             return savedAnswer;
         }
