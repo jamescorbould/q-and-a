@@ -24,7 +24,7 @@ export const QuestionPage: FC<RouteComponentProps<RouteParams>> = ({
 
   const setUpSignalRConnection = async (questionId: number) => {
     const connection = new HubConnectionBuilder()
-      .withUrl('http://localhost:17525/questionshub')
+      .withUrl('http://localhost:5000/questionshub')
       .withAutomaticReconnect()
       .build();
 
