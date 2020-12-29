@@ -3,7 +3,13 @@ import { gray3, gray6 } from './Styles';
 import { FC, useState, Fragment, useEffect } from 'react';
 import { Page } from './Page';
 import { RouteComponentProps } from 'react-router-dom';
-import { QuestionData, getQuestion, postAnswer } from './QuestionsData';
+import {
+  QuestionData,
+  getQuestion,
+  postAnswer,
+  mapQuestionFromServer,
+  QuestionDataFromServer,
+} from './QuestionsData';
 import { AnswerList } from './AnswerList';
 import { Form, required, minLength, Values } from './Form';
 import { Field } from './Field';
@@ -32,9 +38,9 @@ export const QuestionPage: FC<RouteComponentProps<RouteParams>> = ({
       console.log('Message', message);
     });
 
-    connection.on('ReceiveQuestion', (question: QuestionData) => {
+    connection.on('ReceiveQuestion', (question: QuestionDataFromServer) => {
       console.log('ReceiveQuestion', question);
-      setQuestion(question);
+      setQuestion(mapQuestionFromServer(question));
     });
 
     try {
