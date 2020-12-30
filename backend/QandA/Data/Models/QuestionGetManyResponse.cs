@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace QandA.Data.Models
 {
@@ -12,5 +13,6 @@ namespace QandA.Data.Models
         {
             get; set;
         }
+        public List<AnswerGetResponse> Answers { get; set; }
     }
 }
