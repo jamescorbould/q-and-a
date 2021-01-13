@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using QandA.Data.Models;
 using System.Linq;
 using static Dapper.SqlMapper;
+using System.Threading.Tasks;
 
 namespace QandA.Data
 {
@@ -76,6 +77,26 @@ namespace QandA.Data
             }
         }
 
+        public IEnumerable<QuestionGetManyResponse>GetQuestionsBySearchWithPaging(string search, int pageNumber, int pageSize)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var parameters = new
+                {
+                    Search = search,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+                return connection.Query<QuestionGetManyResponse>(
+                    @"EXEC dbo.Question_GetMany_BySearch_WithPaging
+                    @Search = @Search,
+                    @PageNumber = @PageNumber,
+                    @PageSize = @PageSize", parameters
+                );
+            }
+        }
+
         public IEnumerable<QuestionGetManyResponse> GetUnansweredQuestions()
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -85,12 +106,21 @@ namespace QandA.Data
             }
         }
 
-        public bool QuestionExists(int questionId)
+        public async Task<IEnumerable<QuestionGetManyResponse>> GetUnansweredQuestionsAsync()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                return await connection.QueryAsync<QuestionGetManyResponse>("EXEC dbo.Question_GetUnanswered");
+            }
+        }
+
+        public async Task<bool> QuestionExistsAsync(int questionId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                return connection.QueryFirst<bool>(@"EXEC dbo.Question_Exists @QuestionId = @QuestionId",
+                return await connection.QueryFirstAsync<bool>(@"EXEC dbo.Question_Exists @QuestionId = @QuestionId",
                     new { QuestionId = questionId }
                 );
             }
@@ -141,12 +171,12 @@ namespace QandA.Data
             }
         }
 
-        public AnswerGetResponse PostAnswer(AnswerPostFullRequest answer)
+        public async Task<AnswerGetResponse> PostAnswerAsync(AnswerPostFullRequest answer)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                connection.Open();
-                return connection.QueryFirst<AnswerGetResponse>(
+                await connection.OpenAsync();
+                return await connection.QueryFirstAsync<AnswerGetResponse>(
                     @"EXEC dbo.Answer_Post
                     @QuestionId = @QuestionId, @Content = @Content,
                     @UserId = @UserId, @UserName = @UserName,

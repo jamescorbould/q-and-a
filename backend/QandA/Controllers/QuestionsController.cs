@@ -5,6 +5,7 @@ using QandA.Data;
 using QandA.Data.Models;
 using Microsoft.AspNetCore.SignalR;
 using QandA.Hubs;
+using System.Threading.Tasks;
 
 namespace QandA.Controllers
 {
@@ -14,15 +15,17 @@ namespace QandA.Controllers
     {
         private readonly IDataRepository _dataRepository;
         private readonly IHubContext<QuestionsHub> _questionHubContext;
+        private readonly IQuestionCache _cache;
 
-        public QuestionsController(IDataRepository dataRepository, IHubContext<QuestionsHub> questionHubContext)
+        public QuestionsController(IDataRepository dataRepository, IHubContext<QuestionsHub> questionHubContext, IQuestionCache questionCache)
         {
             _dataRepository = dataRepository;
             _questionHubContext = questionHubContext;
+            _cache = questionCache;
         }
 
         [HttpGet]
-        public IEnumerable<QuestionGetManyResponse> GetQuestions(string search, bool includeAnswers)
+        public IEnumerable<QuestionGetManyResponse> GetQuestions(string search, bool includeAnswers, int page = 1, int pageSize = 20)
         {
             if (string.IsNullOrEmpty(search))
             {
@@ -37,24 +40,31 @@ namespace QandA.Controllers
             }
             else
             {
-                return _dataRepository.GetQuestionsBySearch(search);
+                return _dataRepository.GetQuestionsBySearchWithPaging(search, page, pageSize);
             }
         }
 
         [HttpGet("unanswered")]
-        public IEnumerable<QuestionGetManyResponse> GetUnansweredQuestions()
+        public async Task<IEnumerable<QuestionGetManyResponse>> GetUnansweredQuestionsAsync()
         {
-            return _dataRepository.GetUnansweredQuestions();
+            return await _dataRepository.GetUnansweredQuestionsAsync();
         }
 
         [HttpGet("{questionId}")]
         public ActionResult<QuestionGetSingleResponse> GetQuestion(int questionId)
         {
-            var question = _dataRepository.GetQuestion(questionId);
+            var question = _cache.Get(questionId);
 
             if (question == null)
             {
-                return NotFound();
+                question = _dataRepository.GetQuestion(questionId);
+
+                if (question == null)
+                {
+                    return NotFound();
+                }
+
+                _cache.Set(question);
             }
 
             return question;
@@ -91,6 +101,8 @@ namespace QandA.Controllers
 
             var savedQuestion = _dataRepository.PutQuestion(questionId, questionPutRequest);
 
+            _cache.Remove(savedQuestion.QuestionId);
+
             return savedQuestion;
         }
 
@@ -106,13 +118,15 @@ namespace QandA.Controllers
 
             _dataRepository.DeleteQuestion(questionId);
 
+            _cache.Remove(questionId);
+
             return NoContent();
         }
 
         [HttpPost("answer")]
-        public ActionResult<AnswerGetResponse> PostAnswer(AnswerPostRequest answerPostRequest)
+        public async Task<ActionResult<AnswerGetResponse>> PostAnswerAsync(AnswerPostRequest answerPostRequest)
         {
-            var questionExists = _dataRepository.QuestionExists(answerPostRequest.QuestionId.Value);
+            var questionExists = await _dataRepository.QuestionExistsAsync(answerPostRequest.QuestionId.Value);
 
             if (!questionExists)
             {
@@ -120,7 +134,7 @@ namespace QandA.Controllers
             }
 
             var savedAnswer =
-                _dataRepository.PostAnswer(new AnswerPostFullRequest
+                await _dataRepository.PostAnswerAsync(new AnswerPostFullRequest
                     {
                         QuestionId = answerPostRequest.QuestionId.Value,
                         Content = answerPostRequest.Content,
@@ -130,8 +144,10 @@ namespace QandA.Controllers
                     }
                 );
 
-            _questionHubContext.Clients.Group($"Question-{answerPostRequest.QuestionId.Value}")
-                .SendAsync("ReceiveQuestion", _dataRepository.GetQuestion(answerPostRequest.QuestionId.Value));
+            await _questionHubContext.Clients.Group($"Question-{answerPostRequest.QuestionId.Value}")
+                                             .SendAsync("ReceiveQuestion", _dataRepository.GetQuestion(answerPostRequest.QuestionId.Value));
+
+            _cache.Remove(answerPostRequest.QuestionId.Value);
 
             return savedAnswer;
         }
