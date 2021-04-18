@@ -6,6 +6,7 @@ using QandA.Data.Models;
 using Microsoft.AspNetCore.SignalR;
 using QandA.Hubs;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QandA.Controllers
 {
@@ -86,6 +87,7 @@ namespace QandA.Controllers
             return CreatedAtAction(nameof(GetQuestion), new { questionId = savedQuestion.QuestionId }, savedQuestion);
         }
 
+        [Authorize(Policy = "MustBeQuestionAuthor")]
         [HttpPut("{questionId}")]
         public ActionResult<QuestionGetSingleResponse> PutQuestion(int questionId, QuestionPutRequest questionPutRequest)
         {
@@ -106,6 +108,7 @@ namespace QandA.Controllers
             return savedQuestion;
         }
 
+        [Authorize(Policy = "MustBeQuestionAuthor")]
         [HttpDelete("{questionId}")]
         public ActionResult DeleteQuestion(int questionId)
         {
